@@ -60,6 +60,7 @@
                             <span class="p-name">Parceiro</span>
                             <span class="p-team">Dupla 1</span>
                         </div>
+                        <div class="player-timer" id="timerP2">30s</div>
                     </div>
                     <div class="hand-cards opponents-hand" id="handP2">
                         <!-- Card backs rendered here -->
@@ -74,6 +75,7 @@
                             <span class="p-name">Adversário 1</span>
                             <span class="p-team">Dupla 2</span>
                         </div>
+                        <div class="player-timer" id="timerP1">30s</div>
                     </div>
                     <div class="hand-cards opponents-hand vertical-hand" id="handP1">
                         <!-- Card backs rendered here -->
@@ -120,7 +122,7 @@
                                 <span class="btn-icon">✂️</span>
                                 <span class="btn-text">
                                     <strong>CORTAR</strong>
-                                    <small>Naipe sorteado • Pontos x1</small>
+                                    <small>Ás/7 inverte naipe • Pontos x1</small>
                                 </span>
                             </button>
                             <button class="btn-action btn-bater" id="btnBater">
@@ -149,6 +151,7 @@
                             <span class="p-name">Adversário 2</span>
                             <span class="p-team">Dupla 2</span>
                         </div>
+                        <div class="player-timer" id="timerP3">30s</div>
                     </div>
                     <div class="hand-cards opponents-hand vertical-hand" id="handP3">
                         <!-- Card backs rendered here -->
@@ -163,6 +166,7 @@
                             <span class="p-name">Você (Jogador 1)</span>
                             <span class="p-team">Dupla 1</span>
                         </div>
+                        <div class="player-timer" id="timerP0">30s</div>
                     </div>
                     
                     <div class="user-hand-container">
@@ -208,10 +212,13 @@
                 <h2>Regras da Bisca Capixaba</h2>
                 <div class="rules-content">
                     <p><strong>Força das cartas:</strong> Ás (11 pts) &gt; 7 (10 pts) &gt; Rei (4 pts) &gt; Valete (3 pts) &gt; Dama (2 pts) &gt; 6, 5, 4, 3, 2 (0 pts). Total da mão: 120 pontos.</p>
-                    <p><strong>CORTAR:</strong> Sorteia o naipe de trunfo. Pontuação normal (x1).</p>
+                    <p><strong>CORTAR:</strong> Sorteia o trunfo. Se sair Ás ou 7, o trunfo vira o naipe contrário (Ouros ↔ Copas, Espadas ↔ Paus). Outras cartas mantêm o próprio naipe. Pontuação x1.</p>
                     <p><strong>BATER:</strong> Copas vira trunfo automaticamente e a pontuação da partida vale o dobro (x2).</p>
+                    <p><strong>Temporizador:</strong> Cada jogador tem 30s para jogar. Ao zerar, uma carta válida é jogada automaticamente.</p>
+                    <p><strong>Ás de trunfo:</strong> Só pode ser jogado após o 7 de trunfo já ter saído na partida.</p>
+                    <p><strong>7 de trunfo:</strong> Não pode ser jogado de fundo (como a 4ª carta da rodada), exceto na última mão quando resta apenas 1 carta.</p>
                     <p><strong>Troca do 2:</strong> Quem tiver o 2 do naipe de trunfo pode trocá-lo pela carta de trunfo da mesa antes da 1ª jogada.</p>
-                    <p><strong>Sem obrigação de naipe:</strong> Pode jogar qualquer carta a qualquer momento. Maior trunfo leva; se não houver trunfo, vence a maior carta do naipe da primeira jogada.</p>
+                    <p><strong>Sem obrigação de naipe:</strong> Pode jogar qualquer carta válida a qualquer momento.</p>
                     <p><strong>Heley:</strong> Ás de trunfo jogado IMEDIATAMENTE após o 7 de trunfo na mesma vaza vale 1 ponto (2 se batida). Se for da mesma dupla (Heley de amigo), o ponto vai para a dupla adversária!</p>
                     <p><strong>Capote:</strong> Deixar a dupla adversária com menos de 31 pontos na contagem de cartas dá 1 ponto (2 se batida).</p>
                     <p><strong>Regra dos 120:</strong> Fazer os 120 pontos da rodada ganha a partida IMEDIATAMENTE!</p>

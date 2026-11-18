@@ -355,6 +355,39 @@ body {
     font-weight: 800;
 }
 
+/* Player 30-Second Timer */
+.player-timer {
+    display: none;
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    padding: 1px 7px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid var(--gold-accent);
+    color: var(--gold-accent);
+    margin-left: 6px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.player-timer.active {
+    display: inline-block;
+}
+
+.player-timer.timer-warning {
+    background: #c0392b !important;
+    border-color: #ff7675 !important;
+    color: #ffffff !important;
+    animation: timerPulse 0.75s infinite alternate;
+}
+
+@keyframes timerPulse {
+    from { transform: scale(1); box-shadow: 0 0 4px #e74c3c; }
+    to { transform: scale(1.15); box-shadow: 0 0 12px #ff7675; }
+}
+
 /* ============================================================
    PLAYING CARDS (PURE HTML & CSS REALISTIC STYLE)
    ============================================================ */
@@ -392,6 +425,30 @@ body {
     transform: translateY(-16px) scale(1.1);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.8), 0 0 18px rgba(245, 176, 65, 0.9);
     border: 2px solid var(--gold-accent);
+}
+
+/* Card Blocked by Rules (Ás antes do 7 / 7 de fundo) */
+.card-item.card-blocked {
+    opacity: 0.52 !important;
+    filter: grayscale(0.5) !important;
+    cursor: not-allowed !important;
+    border-color: #7f8c8d !important;
+}
+
+.card-item.card-blocked:hover {
+    transform: none !important;
+    box-shadow: 0 4px 10px var(--card-shadow) !important;
+    border-color: #e74c3c !important;
+}
+
+.card-blocked-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.35rem;
+    pointer-events: none;
+    opacity: 0.8;
 }
 
 /* Card Faces */

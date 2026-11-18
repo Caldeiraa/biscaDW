@@ -13,6 +13,14 @@ const ICONES_NAIPES = {
     'Paus': '♣'
 };
 
+// Mapeamento de naipes contrários para a regra do CORTAR (Ás e 7)
+const NAIPES_CONTRARIOS = {
+    'Ouros': 'Copas',
+    'Copas': 'Ouros',
+    'Espadas': 'Paus',
+    'Paus': 'Espadas'
+};
+
 // Ordem de força: Ás > 7 > Rei > Valete > Dama > 6 > 5 > 4 > 3 > 2
 // Pontuação: Ás=11, 7=10, Rei=4, Valete=3, Dama=2, 6..2=0
 const DEFINICAO_CARTAS = [
@@ -41,11 +49,12 @@ const gameState = {
     maoAtiva: false,
     baralho: [],
     monte: [],            // Cartas restantes para compra
-    cartaTrunfoMesa: null,// Carta indicadora do trunfo
+    cartaTrunfoMesa: null,// Carta indicadora do trunfo (fundo do monte)
     naipeTrunfo: null,
     metodoEscolha: null,  // 'cortar' | 'bater'
     multiplicador: 1,     // 1 (normal) ou 2 (copas batida)
     rodadaAtual: 0,       // Contador de 1 a 10 rodadas
+    seteDeTrunfoJogado: false, // Rastreia se o 7 de trunfo já saiu na partida
     
     // Jogadores: 0 = Você, 1 = Adv 1, 2 = Parceiro, 3 = Adv 2
     jogadores: [
@@ -69,8 +78,14 @@ const gameState = {
     vazaProcessando: false
 };
 
+// --- CONTROLE DO TEMPORIZADOR DE 30 SEGUNDOS ---
+let timerInterval = null;
+let tempoRestante = 30;
+let jogadorTimerAtual = null;
+let jogadaEmExecucao = false; // Trava contra race conditions
+
 // --- ELEMENTOS DO DOM ---
-const dom = {
+const dom = (typeof document !== 'undefined') ? {
     matchScore1: document.getElementById('matchScore1'),
     matchScore2: document.getElementById('matchScore2'),
     handCards1: document.getElementById('handCards1'),
@@ -105,6 +120,11 @@ const dom = {
     infoP2: document.getElementById('infoP2'),
     infoP3: document.getElementById('infoP3'),
     
+    timerP0: document.getElementById('timerP0'),
+    timerP1: document.getElementById('timerP1'),
+    timerP2: document.getElementById('timerP2'),
+    timerP3: document.getElementById('timerP3'),
+    
     trickSpot0: document.getElementById('trickSpot0'),
     trickSpot1: document.getElementById('trickSpot1'),
     trickSpot2: document.getElementById('trickSpot2'),
@@ -122,7 +142,7 @@ const dom = {
     btnRulesToggle: document.getElementById('btnRulesToggle'),
     rulesModal: document.getElementById('rulesModal'),
     btnCloseRules: document.getElementById('btnCloseRules')
-};
+} : {};
 
 // ============================================================
 // 1. CRIAÇÃO E EMBARALHAMENTO DO BARALHO (40 CARTAS SEM REPETIÇÃO)
@@ -157,41 +177,54 @@ function embaralhar(baralho) {
 // ============================================================
 
 /**
- * Botão CORTAR:
- * - O baralho de 40 cartas é embaralhado.
- * - Uma carta é retirada para ser o trunfo e colocada no fundo do monte.
- * - Qualquer naipe pode sair (inclusive Copas).
- * - Se Copas sair pelo corte, os pontos permanecem normais (x1).
+ * Regra para o botão CORTAR:
+ * Se a carta retirada for um Ás ou um 7, o naipe da partida será o naipe contrário:
+ * - Ouros ♦ <-> Copas ♥
+ * - Espadas ♠ <-> Paus ♣
+ * Se não for Ás nem 7, mantém o próprio naipe da carta.
  */
+function determinarNaipeCorte(carta) {
+    if (carta.valor === 'Ás' || carta.valor === '7') {
+        return NAIPES_CONTRARIOS[carta.naipe];
+    }
+    return carta.naipe;
+}
+
 function executarCortar() {
     if (gameState.maoAtiva) return;
 
     const baralhoCompleto = embaralhar(criarBaralho());
     
-    // Escolhe uma carta para ser a carta indicadora do trunfo (fundo do monte)
+    // Escolhe uma carta para ser a carta indicadora do corte (fundo do monte)
     const indexSorteado = Math.floor(Math.random() * baralhoCompleto.length);
     const cartaTrunfo = baralhoCompleto[indexSorteado];
     
-    // Coloca a carta de trunfo na posição 0 (fundo do monte)
+    // Coloca a carta na posição 0 (fundo do monte)
     baralhoCompleto.splice(indexSorteado, 1);
     baralhoCompleto.unshift(cartaTrunfo);
 
+    // Aplica a regra de inversão de naipe para Ás e 7
+    const naipeDefinido = determinarNaipeCorte(cartaTrunfo);
+
     gameState.cartaTrunfoMesa = cartaTrunfo;
-    gameState.naipeTrunfo = cartaTrunfo.naipe;
+    gameState.naipeTrunfo = naipeDefinido;
     gameState.metodoEscolha = 'cortar';
-    gameState.multiplicador = 1;
+    gameState.multiplicador = 1; // Corte mantém pontos normais (x1)
     gameState.baralho = baralhoCompleto;
 
     iniciarDistribuicaoEMao();
-    mostrarNotificacao(`✂️ Corte realizado! Trunfo: ${cartaTrunfo.valor} de ${cartaTrunfo.naipe}. Pontos normais (x1).`);
+
+    if (cartaTrunfo.valor === 'Ás' || cartaTrunfo.valor === '7') {
+        mostrarNotificacao(`✂️ Corte: Saiu ${cartaTrunfo.valor} de ${cartaTrunfo.naipe}! Regra do Corte (Ás/7): o trunfo é o naipe contrário (${naipeDefinido.toUpperCase()})!`);
+    } else {
+        mostrarNotificacao(`✂️ Corte realizado! Trunfo: ${cartaTrunfo.valor} de ${cartaTrunfo.naipe}. Pontos normais (x1).`);
+    }
 }
 
 /**
  * Botão BATER:
- * - O baralho de 40 cartas é embaralhado.
- * - Copas é automaticamente definido como trunfo.
- * - Multiplicador de Copas Batida = 2 (pontos valem o dobro).
- * - Uma carta de Copas é colocada no fundo do monte como indicadora.
+ * - Copas é definido automaticamente como trunfo.
+ * - Ativa o multiplicador dobrado (Copas Batida = 2).
  */
 function executarBater() {
     if (gameState.maoAtiva) return;
@@ -217,23 +250,18 @@ function executarBater() {
 // 3. DISTRIBUIÇÃO DAS CARTAS & PROGRESSÃO (40 CARTAS, 10 RODADAS)
 // ============================================================
 
-/**
- * Distribui 3 cartas para cada jogador:
- * - Total de 12 cartas distribuídas.
- * - 28 cartas restantes no monte de compra.
- * - A carta indicadora de trunfo fica visível na mesa (é a última carta do monte).
- */
 function iniciarDistribuicaoEMao() {
     gameState.maoAtiva = true;
     gameState.primeiraJogadaDaMaoFeita = false;
     gameState.cartasNaMesa = [];
     gameState.pontosCartasMao = { dupla1: 0, dupla2: 0 };
     gameState.rodadaAtual = 0;
+    gameState.seteDeTrunfoJogado = false; // Reinicia rastreio do 7 de trunfo
 
     // Limpa mãos anteriores
     gameState.jogadores.forEach(j => j.mao = []);
 
-    // Distribui 3 cartas para cada um dos 4 participantes (12 cartas do topo)
+    // Distribui 3 cartas para cada um dos 4 participantes (12 cartas)
     for (let r = 0; r < 3; r++) {
         for (let j = 0; j < 4; j++) {
             const carta = gameState.baralho.pop();
@@ -250,7 +278,7 @@ function iniciarDistribuicaoEMao() {
     // Atualiza exibições
     atualizarDisplayTrunfo();
     atualizarDisplayMonte();
-    renderizarMaoJogador(true); // animação de distribuição
+    renderizarMaoJogador(true);
     renderizarMaosOponentes();
     atualizarPlacarInterface();
 
@@ -268,7 +296,7 @@ function iniciarDistribuicaoEMao() {
 
 /**
  * Regra da Troca do 2 de Trunfo:
- * Se algum jogador receber o 2 do naipe de trunfo, pode trocá-lo pela
+ * Quem tiver o 2 do naipe de trunfo da partida pode trocá-lo pela
  * carta indicadora do trunfo antes da primeira jogada da mão.
  */
 function verificarTrocaDoDois() {
@@ -296,7 +324,6 @@ function verificarTrocaDoDois() {
             const cartaDois = bot.mao[idxDois];
             bot.mao[idxDois] = gameState.cartaTrunfoMesa;
             gameState.cartaTrunfoMesa = cartaDois;
-            // Atualiza também no fundo do monte
             if (gameState.monte.length > 0) {
                 gameState.monte[0] = cartaDois;
             }
@@ -318,7 +345,6 @@ function executarTrocaDoisJogador() {
 
         mao[idxDois] = antigaMesa;
         gameState.cartaTrunfoMesa = cartaDois;
-        // Atualiza a carta indicadora no fundo do monte
         if (gameState.monte.length > 0) {
             gameState.monte[0] = cartaDois;
         }
@@ -331,14 +357,163 @@ function executarTrocaDoisJogador() {
 }
 
 // ============================================================
-// 4. JOGADAS E REGRAS DAS RODADAS (VAZAS)
+// 4. VALIDAÇÃO DE REGRAS DE JOGADA (MOTOR DE VALIDAÇÃO)
+// ============================================================
+
+/**
+ * Validação centralizada de jogada:
+ * 1. Deve ser a vez do jogador e a partida deve estar ativa.
+ * 2. A carta deve pertencer à mão do participante.
+ * 3. Regra do Ás de trunfo:
+ *    - Só pode ser jogado após o 7 de trunfo já ter saído.
+ *    - Se o 7 de trunfo não tiver saído e o jogador possui outras cartas, o Ás está bloqueado.
+ * 4. Regra do 7 de trunfo (Não pode sair de fundo):
+ *    - Não pode ser jogado como 4ª carta da rodada (cartasNaMesa.length === 3).
+ *    - Exceção: última mão da partida, quando possui somente 1 carta restante.
+ */
+function validarJogada(jogadorId, carta, mao) {
+    if (!gameState.maoAtiva) {
+        return { valido: false, motivo: 'A partida não está ativa.' };
+    }
+    if (gameState.vazaProcessando) {
+        return { valido: false, motivo: 'A rodada anterior está sendo processada.' };
+    }
+    if (gameState.jogadorVez !== jogadorId) {
+        return { valido: false, motivo: 'Não é a sua vez de jogar.' };
+    }
+    if (!mao.some(c => c.id === carta.id)) {
+        return { valido: false, motivo: 'A carta selecionada não está na sua mão.' };
+    }
+
+    // REGRA 3: Ás do naipe de trunfo só pode ser jogado depois que o 7 de trunfo sair
+    if (carta.valor === 'Ás' && carta.naipe === gameState.naipeTrunfo) {
+        if (!gameState.seteDeTrunfoJogado) {
+            // Se o jogador possui outras cartas na mão, ele é obrigado a jogar outra
+            const outrasCartas = mao.filter(c => !(c.valor === 'Ás' && c.naipe === gameState.naipeTrunfo));
+            if (outrasCartas.length > 0) {
+                return { 
+                    valido: false, 
+                    motivo: 'O Ás de trunfo só pode ser jogado depois que o 7 de trunfo sair.' 
+                };
+            }
+        }
+    }
+
+    // REGRA 4: 7 de trunfo não pode sair de fundo (4ª carta da rodada)
+    if (carta.valor === '7' && carta.naipe === gameState.naipeTrunfo) {
+        if (gameState.cartasNaMesa.length === 3) {
+            // Exceção: na última mão (quando resta apenas 1 carta), a restrição deixa de existir
+            if (mao.length > 1) {
+                return { 
+                    valido: false, 
+                    motivo: 'O 7 de trunfo não pode ser jogado de fundo.' 
+                };
+            }
+        }
+    }
+
+    return { valido: true };
+}
+
+// ============================================================
+// 5. TEMPORIZADOR DE 30 SEGUNDOS
+// ============================================================
+
+function iniciarTemporizador(jogadorId) {
+    pararTemporizador();
+
+    if (!gameState.maoAtiva || gameState.vazaProcessando) return;
+
+    jogadorTimerAtual = jogadorId;
+    tempoRestante = 30;
+
+    atualizarDisplayTimer(jogadorId, tempoRestante);
+
+    timerInterval = setInterval(() => {
+        tempoRestante--;
+
+        if (tempoRestante >= 0) {
+            atualizarDisplayTimer(jogadorId, tempoRestante);
+        }
+
+        if (tempoRestante <= 0) {
+            pararTemporizador();
+            executarJogadaAutomaticaPorTempo(jogadorId);
+        }
+    }, 1000);
+}
+
+function pararTemporizador() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    for (let i = 0; i < 4; i++) {
+        const elTimer = document.getElementById(`timerP${i}`);
+        if (elTimer) {
+            elTimer.className = 'player-timer';
+            elTimer.style.display = 'none';
+        }
+    }
+    jogadorTimerAtual = null;
+}
+
+function atualizarDisplayTimer(jogadorId, segundos) {
+    for (let i = 0; i < 4; i++) {
+        const elTimer = document.getElementById(`timerP${i}`);
+        if (elTimer) {
+            if (i === jogadorId) {
+                elTimer.style.display = 'inline-block';
+                elTimer.textContent = `${segundos}s`;
+                if (segundos <= 10) {
+                    elTimer.className = 'player-timer active timer-warning';
+                } else {
+                    elTimer.className = 'player-timer active';
+                }
+            } else {
+                elTimer.className = 'player-timer';
+                elTimer.style.display = 'none';
+            }
+        }
+    }
+}
+
+/**
+ * Quando o tempo esgota, o sistema seleciona automaticamente uma carta
+ * aleatória que respeite as regras da Bisca Capixaba.
+ */
+function executarJogadaAutomaticaPorTempo(jogadorId) {
+    if (jogadaEmExecucao || !gameState.maoAtiva || gameState.vazaProcessando || gameState.jogadorVez !== jogadorId) return;
+
+    const mao = gameState.jogadores[jogadorId].mao;
+    if (mao.length === 0) return;
+
+    jogadaEmExecucao = true;
+
+    // Filtra estritamente as cartas válidas pelas regras
+    let cartasValidas = mao.filter(c => validarJogada(jogadorId, c, mao).valido);
+    if (cartasValidas.length === 0) {
+        cartasValidas = mao; // Fallback extremo de segurança
+    }
+
+    const cartaEscolhida = cartasValidas[Math.floor(Math.random() * cartasValidas.length)];
+    const idx = mao.indexOf(cartaEscolhida);
+    mao.splice(idx, 1);
+
+    mostrarNotificacao(`⏰ Tempo esgotado! Uma carta foi selecionada automaticamente.`);
+    processarJogada(jogadorId, cartaEscolhida);
+    jogadaEmExecucao = false;
+}
+
+// ============================================================
+// 6. JOGADAS E EXECUÇÃO DAS RODADAS (VAZAS)
 // ============================================================
 
 /**
  * Jogador humano clica em uma de suas cartas
  */
 function jogarCartaHumano(indexNaMao) {
-    if (!gameState.maoAtiva || gameState.vazaProcessando) return;
+    if (jogadaEmExecucao || !gameState.maoAtiva || gameState.vazaProcessando) return;
     if (gameState.jogadorVez !== 0) {
         mostrarNotificacao('Aguarde sua vez de jogar!');
         return;
@@ -347,9 +522,21 @@ function jogarCartaHumano(indexNaMao) {
     const mao = gameState.jogadores[0].mao;
     if (indexNaMao < 0 || indexNaMao >= mao.length) return;
 
-    // Retira a carta da mão e a posiciona no centro
-    const [carta] = mao.splice(indexNaMao, 1);
+    const carta = mao[indexNaMao];
+    const validacao = validarJogada(0, carta, mao);
+
+    if (!validacao.valido) {
+        mostrarNotificacao(validacao.motivo);
+        return;
+    }
+
+    jogadaEmExecucao = true;
+    pararTemporizador();
+
+    // Retira a carta da mão e joga
+    mao.splice(indexNaMao, 1);
     processarJogada(0, carta);
+    jogadaEmExecucao = false;
 }
 
 /**
@@ -358,6 +545,12 @@ function jogarCartaHumano(indexNaMao) {
 function processarJogada(jogadorId, carta) {
     gameState.primeiraJogadaDaMaoFeita = true;
     dom.trocaDoisContainer.style.display = 'none';
+    pararTemporizador(); // Cancela o timer imediatamente
+
+    // Rastreia se o 7 de trunfo foi jogado (liberando o Ás de trunfo)
+    if (carta.valor === '7' && carta.naipe === gameState.naipeTrunfo) {
+        gameState.seteDeTrunfoJogado = true;
+    }
 
     // Registra na mesa
     gameState.cartasNaMesa.push({ jogadorId, carta });
@@ -401,48 +594,47 @@ function agendarJogadaBot() {
         const mao = gameState.jogadores[botId].mao;
         if (mao.length === 0) return;
 
-        const cartaEscolhida = escolherCartaBot(botId, mao, gameState.cartasNaMesa, gameState.naipeTrunfo);
+        // Filtra apenas cartas válidas pelas regras
+        const cartasValidas = mao.filter(c => validarJogada(botId, c, mao).valido);
+        const listaOpcoes = cartasValidas.length > 0 ? cartasValidas : mao;
+
+        const cartaEscolhida = escolherCartaBot(botId, listaOpcoes, gameState.cartasNaMesa, gameState.naipeTrunfo);
         const idx = mao.indexOf(cartaEscolhida);
         mao.splice(idx, 1);
 
         processarJogada(botId, cartaEscolhida);
-    }, 600);
+    }, 650);
 }
 
-function escolherCartaBot(botId, mao, cartasNaMesa, trunfo) {
+function escolherCartaBot(botId, cartasValidas, cartasNaMesa, trunfo) {
     const duplaBot = gameState.jogadores[botId].dupla;
 
-    // Se for o primeiro da vaza:
     if (cartasNaMesa.length === 0) {
-        // Descarta carta sem pontos que não seja trunfo
-        const descartes = mao.filter(c => c.pontos === 0 && c.naipe !== trunfo);
+        const descartes = cartasValidas.filter(c => c.pontos === 0 && c.naipe !== trunfo);
         if (descartes.length > 0) return descartes[0];
-        return mao.slice().sort((a, b) => a.forca - b.forca)[0];
+        return cartasValidas.slice().sort((a, b) => a.forca - b.forca)[0];
     }
 
-    // Vencedor atual da mesa:
     const vencedorAtual = calcularVencedorParcial(cartasNaMesa, trunfo);
     const parceiroGanhando = (gameState.jogadores[vencedorAtual.jogadorId].dupla === duplaBot);
 
-    // Evita Heley de amigo se o parceiro acabou de jogar o 7 de trunfo:
+    // Evita Heley de amigo se o parceiro acabou de jogar o 7 de trunfo
     const ultimaJogada = cartasNaMesa[cartasNaMesa.length - 1];
     const ehParceiro = gameState.jogadores[ultimaJogada.jogadorId].dupla === duplaBot;
     const jogouSeteDeTrunfo = (ultimaJogada.carta.valor === '7' && ultimaJogada.carta.naipe === trunfo);
 
     if (ehParceiro && jogouSeteDeTrunfo) {
-        const cartasSeguras = mao.filter(c => !(c.valor === 'Ás' && c.naipe === trunfo));
+        const cartasSeguras = cartasValidas.filter(c => !(c.valor === 'Ás' && c.naipe === trunfo));
         if (cartasSeguras.length > 0) return cartasSeguras[0];
     }
 
-    // Se o parceiro já está vencendo a vaza:
     if (parceiroGanhando) {
-        const cartaPontos = mao.find(c => c.pontos > 0 && c.naipe !== trunfo);
+        const cartaPontos = cartasValidas.find(c => c.pontos > 0 && c.naipe !== trunfo);
         if (cartaPontos) return cartaPontos;
-        return mao.slice().sort((a, b) => a.forca - b.forca)[0];
+        return cartasValidas.slice().sort((a, b) => a.forca - b.forca)[0];
     }
 
-    // Se adversário está vencendo: tenta cobrir com a menor carta vencedora
-    const cartasQueGanham = mao.filter(c => {
+    const cartasQueGanham = cartasValidas.filter(c => {
         return comparaDuasCartas(c, vencedorAtual.carta, cartasNaMesa[0].carta.naipe, trunfo) > 0;
     });
 
@@ -450,14 +642,13 @@ function escolherCartaBot(botId, mao, cartasNaMesa, trunfo) {
         return cartasQueGanham.sort((a, b) => a.forca - b.forca)[0];
     }
 
-    // Não vence: joga a carta mais fraca
-    const descartes = mao.filter(c => c.naipe !== trunfo && c.pontos === 0);
+    const descartes = cartasValidas.filter(c => c.naipe !== trunfo && c.pontos === 0);
     if (descartes.length > 0) return descartes[0];
-    return mao.slice().sort((a, b) => a.forca - b.forca)[0];
+    return cartasValidas.slice().sort((a, b) => a.forca - b.forca)[0];
 }
 
 // ============================================================
-// 5. DETERMINAÇÃO DO VENCEDOR DA VAZA & REGRA DO HELEY
+// 7. DETERMINAÇÃO DO VENCEDOR DA VAZA & REGRA DO HELEY
 // ============================================================
 
 function comparaDuasCartas(cartaA, cartaB, naipePrimeira, naipeTrunfo) {
@@ -533,10 +724,8 @@ function verificarHeleyNaVaza(cartasNaMesa, naipeTrunfo) {
     return null;
 }
 
-/**
- * Avalia o término de uma vaza (rodada de 4 cartas)
- */
 function avaliarFimDaVaza() {
+    pararTemporizador();
     gameState.rodadaAtual++;
     const vencedorJogada = calcularVencedorParcial(gameState.cartasNaMesa, gameState.naipeTrunfo);
     const vencedorId = vencedorJogada.jogadorId;
@@ -589,7 +778,6 @@ function avaliarFimDaVaza() {
 
     // 3. Animação de recolhimento das cartas e compra após intervalo
     setTimeout(() => {
-        // Animação de recolher
         for (let i = 0; i < 4; i++) {
             const spot = document.getElementById(`trickSpot${i}`);
             if (spot && spot.firstElementChild) {
@@ -624,21 +812,11 @@ function avaliarFimDaVaza() {
     }, 1100);
 }
 
-/**
- * Compra de cartas após a vaza:
- * - O vencedor da rodada compra primeiro.
- * - Os outros compram em sentido horário.
- * - Cada jogador compra exatamente 1 carta.
- * - As cartas são retiradas estritamente do monte pré-embaralhado.
- * - A última carta do monte é a carta indicadora do trunfo da mesa!
- */
 function executarCompraAposVaza(vencedorId) {
     if (gameState.monte.length === 0) {
-        // Monte completamente vazio: não há mais compras
-        return;
+        return; // Monte esgotado
     }
 
-    // Ordem de compra iniciando pelo vencedor da vaza
     for (let offset = 0; offset < 4; offset++) {
         const jId = (vencedorId + offset) % 4;
 
@@ -646,7 +824,6 @@ function executarCompraAposVaza(vencedorId) {
             const cartaComprada = gameState.monte.pop();
             gameState.jogadores[jId].mao.push(cartaComprada);
 
-            // Se o monte chegou a zero e a carta de trunfo estava nele, esconde da mesa
             if (gameState.monte.length === 0) {
                 gameState.cartaTrunfoMesa = null;
                 atualizarDisplayTrunfo();
@@ -655,15 +832,16 @@ function executarCompraAposVaza(vencedorId) {
     }
 
     atualizarDisplayMonte();
-    renderizarMaoJogador(false, true); // com animação de compra para o jogador
+    renderizarMaoJogador(false, true);
     renderizarMaosOponentes();
 }
 
 // ============================================================
-// 6. FINAL DA MÃO & PONTUAÇÃO (CAPOTE, VITÓRIA SIMPLES, 120 PTS)
+// 8. FINAL DA MÃO & PONTUAÇÃO (CAPOTE, VITÓRIA SIMPLES, 120 PTS)
 // ============================================================
 
 function avaliarFimDaMao() {
+    pararTemporizador();
     gameState.maoAtiva = false;
     const pts1 = gameState.pontosCartasMao.dupla1;
     const pts2 = gameState.pontosCartasMao.dupla2;
@@ -720,7 +898,6 @@ function avaliarFimDaMao() {
         return;
     }
 
-    // Prepara para a próxima mão
     setTimeout(() => {
         prepararNovaMao();
     }, 2200);
@@ -739,6 +916,7 @@ function verificarFimDePartida() {
 }
 
 function encerrarPartida(duplaVencedora, motivo) {
+    pararTemporizador();
     gameState.partidaEncerrada = true;
     gameState.maoAtiva = false;
 
@@ -750,12 +928,14 @@ function encerrarPartida(duplaVencedora, motivo) {
 }
 
 function prepararNovaMao() {
+    pararTemporizador();
     gameState.maoAtiva = false;
     gameState.cartasNaMesa = [];
     gameState.cartaTrunfoMesa = null;
     gameState.naipeTrunfo = null;
     gameState.multiplicador = 1;
     gameState.rodadaAtual = 0;
+    gameState.seteDeTrunfoJogado = false;
     gameState.pontosCartasMao = { dupla1: 0, dupla2: 0 };
     gameState.jogadores.forEach(j => j.mao = []);
 
@@ -788,19 +968,23 @@ function reiniciarPartidaCompleta() {
 }
 
 // ============================================================
-// 7. RENDERIZAÇÃO DA INTERFACE & CARTAS REALISTAS
+// 9. RENDERIZAÇÃO DA INTERFACE & CARTAS REALISTAS
 // ============================================================
 
 /**
  * Cria o elemento visual HTML de uma carta de baralho realista
  */
-function criarElementoCarta(carta, options = { interativa: false, onClick: null, animClasse: '' }) {
+function criarElementoCarta(carta, options = { interativa: false, bloqueada: false, motivoBloqueio: '', onClick: null, animClasse: '' }) {
     const el = document.createElement('div');
     const naipeClasse = `suit-${carta.naipe.toLowerCase()}`;
     const icone = ICONES_NAIPES[carta.naipe];
+    const classeBloqueio = options.bloqueada ? 'card-blocked' : '';
 
-    el.className = `card-item ${naipeClasse} ${options.interativa ? 'clickable' : ''} ${options.animClasse || ''}`;
+    el.className = `card-item ${naipeClasse} ${options.interativa ? 'clickable' : ''} ${classeBloqueio} ${options.animClasse || ''}`;
     el.dataset.id = carta.id;
+    if (options.motivoBloqueio) {
+        el.title = options.motivoBloqueio;
+    }
 
     el.innerHTML = `
         <div class="card-corner-top">
@@ -808,6 +992,7 @@ function criarElementoCarta(carta, options = { interativa: false, onClick: null,
             <span class="card-suit">${icone}</span>
         </div>
         <div class="card-center-art">${icone}</div>
+        ${options.bloqueada ? '<div class="card-blocked-badge" title="' + options.motivoBloqueio + '">🔒</div>' : ''}
         <div class="card-points-badge">${carta.pontos > 0 ? carta.pontos + 'p' : ''}</div>
         <div class="card-corner-bottom">
             <span class="card-val">${carta.valor}</span>
@@ -830,6 +1015,9 @@ function criarElementoVersoCarta(animClasse = '') {
     return el;
 }
 
+/**
+ * Renderiza a mão do Jogador 0 (Você) com destaque visual de cartas bloqueadas
+ */
 function renderizarMaoJogador(animDistribuicao = false, animCompra = false) {
     const mao = gameState.jogadores[0].mao;
     dom.userCardsRow.innerHTML = '';
@@ -849,8 +1037,14 @@ function renderizarMaoJogador(animDistribuicao = false, animCompra = false) {
             animClasse = 'card-drawn';
         }
 
+        // Verifica se a carta está bloqueada pelas regras
+        const validacao = validarJogada(0, carta, mao);
+        const estaBloqueada = !validacao.valido;
+
         const el = criarElementoCarta(carta, {
             interativa: (gameState.jogadorVez === 0 && !gameState.vazaProcessando),
+            bloqueada: estaBloqueada,
+            motivoBloqueio: estaBloqueada ? validacao.motivo : '',
             onClick: () => jogarCartaHumano(idx),
             animClasse: animClasse
         });
@@ -859,19 +1053,16 @@ function renderizarMaoJogador(animDistribuicao = false, animCompra = false) {
 }
 
 function renderizarMaosOponentes() {
-    // Jogador 1 (Esquerda - Adversário 1)
     dom.handP1.innerHTML = '';
     gameState.jogadores[1].mao.forEach(() => {
         dom.handP1.appendChild(criarElementoVersoCarta());
     });
 
-    // Jogador 2 (Topo - Parceiro)
     dom.handP2.innerHTML = '';
     gameState.jogadores[2].mao.forEach(() => {
         dom.handP2.appendChild(criarElementoVersoCarta());
     });
 
-    // Jogador 3 (Direita - Adversário 2)
     dom.handP3.innerHTML = '';
     gameState.jogadores[3].mao.forEach(() => {
         dom.handP3.appendChild(criarElementoVersoCarta());
@@ -916,7 +1107,6 @@ function atualizarDisplayTrunfo() {
         dom.multiplierTag.className = 'multiplier-tag';
     }
 
-    // Exibe a carta na mesa
     if (gameState.cartaTrunfoMesa) {
         dom.trumpCardSlot.innerHTML = '';
         const el = criarElementoCarta(gameState.cartaTrunfoMesa);
@@ -954,7 +1144,6 @@ function destacarJogadorVez(jogadorId) {
         }
     });
 
-    // Destaca a mão do jogador local quando for a vez dele
     if (jogadorId === 0 && gameState.maoAtiva && !gameState.vazaProcessando) {
         dom.userHandContainer.classList.add('my-turn');
     } else {
@@ -962,6 +1151,11 @@ function destacarJogadorVez(jogadorId) {
     }
 
     renderizarMaoJogador(false);
+
+    // Dispara o temporizador de 30 segundos para o jogador da vez
+    if (gameState.maoAtiva && !gameState.vazaProcessando) {
+        iniciarTemporizador(jogadorId);
+    }
 }
 
 let timeoutNotificacao = null;
@@ -976,7 +1170,7 @@ function mostrarNotificacao(texto, classeEspecial = '') {
 }
 
 // ============================================================
-// 8. EVENT LISTENERS E INICIALIZAÇÃO
+// 10. EVENT LISTENERS E INICIALIZAÇÃO
 // ============================================================
 function inicializarEventos() {
     dom.btnCortar.addEventListener('click', executarCortar);
@@ -993,8 +1187,29 @@ function inicializarEventos() {
     });
 }
 
-// Inicializa o jogo ao carregar a página
-window.addEventListener('DOMContentLoaded', () => {
-    inicializarEventos();
-    prepararNovaMao();
-});
+// Inicializa o jogo ao carregar a página no navegador
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        inicializarEventos();
+        prepararNovaMao();
+    });
+}
+
+// ============================================================
+// 11. EXPORTAÇÃO PARA TESTES AUTOMATIZADOS (NODE.JS)
+// ============================================================
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        gameState,
+        NAIPES,
+        NAIPES_CONTRARIOS,
+        DEFINICAO_CARTAS,
+        determinarNaipeCorte,
+        validarJogada,
+        comparaDuasCartas,
+        calcularVencedorParcial,
+        verificarHeleyNaVaza,
+        criarBaralho,
+        embaralhar
+    };
+}
