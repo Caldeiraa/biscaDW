@@ -1,56 +1,226 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bisca Capixaba</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bisca Capixaba Online</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <h1>BISCA CAPIXABA</h1>
-    </header>
-    <main>
-        <section id="scoreboard" class="scoreboard">
-            <div class="team" id="teamA">
-                <h2>Dupla 1 (Você + Parceiro)</h2>
-                <p>Pontuação: <span id="scoreA">0</span></p>
+    <div class="game-container">
+        <!-- Top Navigation / Scorebar -->
+        <header class="game-header">
+            <div class="title-container">
+                <span class="game-icon">♠ ♥</span>
+                <h1>BISCA CAPIXABA</h1>
+                <span class="game-icon">♦ ♣</span>
             </div>
-            <div class="team" id="teamB">
-                <h2>Dupla 2 (Adversário + Adversário)</h2>
-                <p>Pontuação: <span id="scoreB">0</span></p>
+
+            <div class="scoreboard-container">
+                <div class="team-score team-1" id="team1ScoreCard">
+                    <div class="team-label">Dupla 1 <span class="team-members">(Você & Parceiro)</span></div>
+                    <div class="points-row">
+                        <div class="match-points"><span id="matchScore1">0</span> <span class="pts-target">/ 4 pts</span></div>
+                        <div class="hand-card-points">Cartas: <strong id="handCards1">0</strong> / 120</div>
+                    </div>
+                </div>
+
+                <div class="trump-badge-container" id="trumpBadgeContainer">
+                    <div class="trump-title">TRUNFO</div>
+                    <div class="trump-display" id="trumpDisplay">
+                        <span class="trump-suit-icon" id="trumpSuitIcon">?</span>
+                        <span class="trump-suit-name" id="trumpSuitName">Aguardando corte</span>
+                    </div>
+                    <div class="multiplier-tag" id="multiplierTag">x1 NORMAL</div>
+                </div>
+
+                <div class="team-score team-2" id="team2ScoreCard">
+                    <div class="team-label">Dupla 2 <span class="team-members">(Adversários)</span></div>
+                    <div class="points-row">
+                        <div class="match-points"><span id="matchScore2">0</span> <span class="pts-target">/ 4 pts</span></div>
+                        <div class="hand-card-points">Cartas: <strong id="handCards2">0</strong> / 120</div>
+                    </div>
+                </div>
             </div>
-        </section>
-        <section id="table" class="table">
-            <div class="player" id="player4">
-                <div class="player-name">Adversário</div>
-                <div class="player-cards" data-player="4"></div>
+        </header>
+
+        <!-- Main Card Table Area -->
+        <main class="table-surface">
+            <!-- Felt Table Border -->
+            <div class="felt-mat">
+                
+                <!-- Player 3: Partner (Top) -->
+                <div class="player-slot player-top" id="slotPlayer2">
+                    <div class="player-info-card" id="infoP2">
+                        <div class="avatar">P3</div>
+                        <div class="player-meta">
+                            <span class="p-name">Parceiro</span>
+                            <span class="p-team">Dupla 1</span>
+                        </div>
+                    </div>
+                    <div class="hand-cards opponents-hand" id="handP2">
+                        <!-- Card backs rendered here -->
+                    </div>
+                </div>
+
+                <!-- Player 2: Adversary 1 (Left) -->
+                <div class="player-slot player-left" id="slotPlayer1">
+                    <div class="player-info-card" id="infoP1">
+                        <div class="avatar">P2</div>
+                        <div class="player-meta">
+                            <span class="p-name">Adversário 1</span>
+                            <span class="p-team">Dupla 2</span>
+                        </div>
+                    </div>
+                    <div class="hand-cards opponents-hand vertical-hand" id="handP1">
+                        <!-- Card backs rendered here -->
+                    </div>
+                </div>
+
+                <!-- Center Area: Deck, Trump Card & Played Trick -->
+                <div class="table-center">
+                    <!-- Trump & Deck Pile -->
+                    <div class="deck-zone">
+                        <div class="deck-pile-wrap" id="deckPileWrap">
+                            <div class="deck-pile" id="deckPile">
+                                <div class="deck-layer layer-3"></div>
+                                <div class="deck-layer layer-2"></div>
+                                <div class="deck-layer layer-1">
+                                    <span class="deck-icon">🂠</span>
+                                    <span class="deck-count" id="deckCount">40</span>
+                                </div>
+                            </div>
+                            <span class="deck-label">MONTE</span>
+                        </div>
+
+                        <div class="trump-card-slot" id="trumpCardSlot">
+                            <div class="trump-card-placeholder" id="trumpCardPlaceholder">
+                                <span>TRUNFO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trick Drop Area (Center cards) -->
+                    <div class="trick-arena" id="trickArena">
+                        <div class="trick-spot spot-bottom" id="trickSpot0"></div>
+                        <div class="trick-spot spot-left" id="trickSpot1"></div>
+                        <div class="trick-spot spot-top" id="trickSpot2"></div>
+                        <div class="trick-spot spot-right" id="trickSpot3"></div>
+                    </div>
+
+                    <!-- Cut / Hit Control Panel (Before Hand Starts) -->
+                    <div class="pre-hand-panel" id="preHandPanel">
+                        <div class="pre-hand-title">ESCOLHA DO TRUNFO</div>
+                        <p class="pre-hand-desc">As cartas serão distribuídas após a sua escolha:</p>
+                        <div class="action-buttons-row">
+                            <button class="btn-action btn-cut" id="btnCortar">
+                                <span class="btn-icon">✂️</span>
+                                <span class="btn-text">
+                                    <strong>CORTAR</strong>
+                                    <small>Naipe sorteado • Pontos x1</small>
+                                </span>
+                            </button>
+                            <button class="btn-action btn-bater" id="btnBater">
+                                <span class="btn-icon">💥</span>
+                                <span class="btn-text">
+                                    <strong>BATER</strong>
+                                    <small>Copas garantido • Pontos x2</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Swap 2 of Trump Button (Troca do 2) -->
+                    <div class="troca-dois-container" id="trocaDoisContainer" style="display: none;">
+                        <button class="btn-troca-dois" id="btnTrocaDois">
+                            🔄 Trocar o 2 pelo Trunfo da Mesa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player 4: Adversary 2 (Right) -->
+                <div class="player-slot player-right" id="slotPlayer3">
+                    <div class="player-info-card" id="infoP3">
+                        <div class="avatar">P4</div>
+                        <div class="player-meta">
+                            <span class="p-name">Adversário 2</span>
+                            <span class="p-team">Dupla 2</span>
+                        </div>
+                    </div>
+                    <div class="hand-cards opponents-hand vertical-hand" id="handP3">
+                        <!-- Card backs rendered here -->
+                    </div>
+                </div>
+
+                <!-- Player 1: You (Bottom) -->
+                <div class="player-slot player-bottom" id="slotPlayer0">
+                    <div class="player-info-card active-turn" id="infoP0">
+                        <div class="avatar">VOCÊ</div>
+                        <div class="player-meta">
+                            <span class="p-name">Você (Jogador 1)</span>
+                            <span class="p-team">Dupla 1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="user-hand-container">
+                        <div class="user-cards-row" id="userCardsRow">
+                            <!-- User's interactive 3 cards will render here -->
+                            <div class="empty-hand-hint" id="emptyHandHint">
+                                Clique em <strong>CORTAR</strong> ou <strong>BATER</strong> acima para receber suas 3 cartas.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div class="center-area" id="centerArea">
-                <div id="trumpSuit" class="trump-suit">Trunfo: —</div>
-                <div class="deck-pile" id="deckPile">🂠</div>
-                <div class="played-cards" id="playedCards"></div>
+        </main>
+
+        <!-- Message/Toast Banner for Heley, Capote, Announcements -->
+        <div class="announcement-banner" id="announcementBanner">
+            <span class="announcement-text" id="announcementText">Bem-vindo à Bisca Capixaba!</span>
+        </div>
+
+        <!-- Game Over / Victory Modal -->
+        <div class="modal-backdrop" id="victoryModal" style="display: none;">
+            <div class="modal-box">
+                <div class="modal-trophy">🏆</div>
+                <h2 id="modalWinnerTitle">VITÓRIA!</h2>
+                <p id="modalWinnerDesc">A Dupla 1 venceu a partida!</p>
+                <div class="modal-stats" id="modalStats">
+                    <div>Placar Final: <strong id="modalFinalScore">4 x 1</strong></div>
+                </div>
+                <button class="btn-restart" id="btnNovaPartida">Jogar Novamente</button>
             </div>
-            <div class="player" id="player2">
-                <div class="player-name">Adversário</div>
-                <div class="player-cards" data-player="2"></div>
+        </div>
+
+        <!-- Footer Info -->
+        <footer class="game-footer">
+            <span>Bisca Capixaba Online • Regras Oficiais • 40 Cartas • Meta: 4 Pontos</span>
+            <button class="btn-rules-toggle" id="btnRulesToggle">Ver Regras</button>
+        </footer>
+
+        <!-- Rules Modal -->
+        <div class="modal-backdrop" id="rulesModal" style="display: none;">
+            <div class="modal-box rules-box">
+                <h2>Regras da Bisca Capixaba</h2>
+                <div class="rules-content">
+                    <p><strong>Força das cartas:</strong> Ás (11 pts) &gt; 7 (10 pts) &gt; Rei (4 pts) &gt; Valete (3 pts) &gt; Dama (2 pts) &gt; 6, 5, 4, 3, 2 (0 pts). Total da mão: 120 pontos.</p>
+                    <p><strong>CORTAR:</strong> Sorteia o naipe de trunfo. Pontuação normal (x1).</p>
+                    <p><strong>BATER:</strong> Copas vira trunfo automaticamente e a pontuação da partida vale o dobro (x2).</p>
+                    <p><strong>Troca do 2:</strong> Quem tiver o 2 do naipe de trunfo pode trocá-lo pela carta de trunfo da mesa antes da 1ª jogada.</p>
+                    <p><strong>Sem obrigação de naipe:</strong> Pode jogar qualquer carta a qualquer momento. Maior trunfo leva; se não houver trunfo, vence a maior carta do naipe da primeira jogada.</p>
+                    <p><strong>Heley:</strong> Ás de trunfo jogado IMEDIATAMENTE após o 7 de trunfo na mesma vaza vale 1 ponto (2 se batida). Se for da mesma dupla (Heley de amigo), o ponto vai para a dupla adversária!</p>
+                    <p><strong>Capote:</strong> Deixar a dupla adversária com menos de 31 pontos na contagem de cartas dá 1 ponto (2 se batida).</p>
+                    <p><strong>Regra dos 120:</strong> Fazer os 120 pontos da rodada ganha a partida IMEDIATAMENTE!</p>
+                </div>
+                <button class="btn-close-rules" id="btnCloseRules">Fechar</button>
             </div>
-            <div class="player" id="player3">
-                <div class="player-name">Parceiro</div>
-                <div class="player-cards" data-player="3"></div>
-            </div>
-            <div class="player" id="player1">
-                <div class="player-name">Você</div>
-                <div class="player-cards" data-player="1"></div>
-            </div>
-        </section>
-        <section id="hand-controls" class="hand-controls">
-            <button id="cutButton" class="action-button">CORTAR</button>
-            <button id="baterButton" class="action-button">BATER</button>
-            <button id="restartButton" class="action-button">REINICIAR</button>
-            <div id="playerHand" class="player-hand"></div>
-        </section>
-    </main>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

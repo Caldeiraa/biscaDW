@@ -1,0 +1,172 @@
+================================================================================
+                    BISCA CAPIXABA - REGRAS OFICIAIS DO JOGO
+================================================================================
+Documento de referência para desenvolvimento, regras regionais e futuras atualizações.
+Data de registro: Novembro de 2026.
+
+--------------------------------------------------------------------------------
+1. ESTRUTURA GERAL DA PARTIDA
+--------------------------------------------------------------------------------
+- Quantidade de jogadores: 4 jogadores.
+- Formação: 2 duplas.
+- Posicionamento na mesa: Os parceiros sentam-se obrigatoriamente em posições 
+  opostas (Norte x Sul formam a Dupla 1; Leste x Oeste formam a Dupla 2).
+- Meta da partida: A partida é disputada até uma das duplas alcançar 4 PONTOS.
+
+--------------------------------------------------------------------------------
+2. COMPOSIÇÃO DO BARALHO E FORÇA DAS CARTAS
+--------------------------------------------------------------------------------
+- Baralho espanhol/italiano adaptado ou tradicional de 40 cartas.
+- Naipes (4): Ouros (♦), Copas (♥), Espadas (♠) e Paus (♣).
+- Cartas removidas: 8, 9 e 10 de todos os naipes (não são utilizadas).
+- Total de cartas por naipe: 10 cartas.
+
+Ordem de Força das Cartas (da mais forte para a mais fraca):
+  Ás > 7 > Rei > Valete > Dama > 6 > 5 > 4 > 3 > 2
+
+Pontuação Individual das Cartas:
+  - Ás     : 11 pontos
+  - 7      : 10 pontos
+  - Rei    : 4 pontos
+  - Valete : 3 pontos
+  - Dama   : 2 pontos
+  - 6      : 0 pontos
+  - 5      : 0 pontos
+  - 4      : 0 pontos
+  - 3      : 0 pontos
+  - 2      : 0 pontos
+
+Total de pontos de cartas disponíveis por mão: 120 PONTOS.
+(4 naipes x 30 pontos por naipe = 120 pontos).
+
+--------------------------------------------------------------------------------
+3. INÍCIO DA MÃO E ESCOLHA DO TRUNFO (CORTAR vs BATER)
+--------------------------------------------------------------------------------
+Antes da escolha do método de trunfo:
+- NENHUM jogador recebe cartas na mão. As mãos começam completamente vazias.
+- O jogador responsável pela rodada deve escolher entre dois botões:
+
+A) BOTÃO CORTAR:
+   - O baralho é cortado de forma tradicional.
+   - Uma carta é retirada aleatoriamente para revelar e definir o naipe de trunfo.
+   - Qualquer naipe pode ser sorteado, inclusive Copas.
+   - IMPORTANTE: Se o naipe de Copas for revelado através do corte normal, NÃO 
+     há multiplicação de pontos (multiplicador = 1).
+
+B) BOTÃO BATER:
+   - O jogador escolhe bater com a mão sobre o montinho de cartas.
+   - O naipe de COPAS é automaticamente e obrigatoriamente definido como trunfo.
+   - Todos os jogadores sabem que Copas é o trunfo.
+   - Essa ação ATIVA O MULTIPLICADOR DE COPAS BATIDA: todos os pontos conquistados
+     na partida durante essa mão passam a valer o DOBRO (multiplicador = 2).
+
+--------------------------------------------------------------------------------
+4. DISTRIBUIÇÃO DAS CARTAS
+--------------------------------------------------------------------------------
+- Imediatamente após a definição do trunfo (seja por corte ou batida), são 
+  distribuídas 3 cartas para cada um dos 4 jogadores.
+- A distribuição é feita em sentido horário.
+- A carta indicadora de trunfo permanece visível na mesa (ao lado ou embaixo do monte).
+- As cartas restantes (40 - 1 trunfo - 12 distribuídas = 27 cartas) formam o monte 
+  de compra no centro da mesa.
+
+--------------------------------------------------------------------------------
+5. REGRA DA TROCA DO 2 DE TRUNFO
+--------------------------------------------------------------------------------
+- Se qualquer jogador receber em sua mão inicial o "2" do naipe de trunfo, ele 
+  tem o direito de trocar esse 2 pela carta indicadora de trunfo que está na mesa.
+- Momento da troca: A troca só pode ser realizada ANTES da primeira carta ser 
+  jogada na mão.
+- Após a primeira jogada ser efetuada na mesa, o direito de troca do 2 expira.
+
+--------------------------------------------------------------------------------
+6. FUNCIONAMENTO DAS RODADAS (VAZAS)
+--------------------------------------------------------------------------------
+- Cada jogador joga 1 carta por vez no centro da mesa, em sentido horário.
+- NÃO EXISTE OBRIGAÇÃO DE ACOMPANHAR O NAIPE (não obriga naipe): o jogador pode 
+  jogar qualquer carta de sua mão a qualquer momento.
+- Critério de vitória da vaza (as 4 cartas jogadas):
+  1. O maior trunfo jogado vence a vaza.
+  2. Se nenhum trunfo for jogado, vence a maior carta do NAIPE DA PRIMEIRA CARTA 
+     JOGADA (naipe de saída).
+- A dupla do jogador vencedor recolhe as 4 cartas jogadas e acumula os pontos delas.
+- Compra de cartas:
+  - Cada jogador compra 1 carta do monte central para repor sua mão (máximo 3 cartas).
+  - A ordem de compra começa pelo vencedor da vaza e segue em sentido horário.
+  - A última carta a ser comprada do monte é a própria carta indicadora de trunfo.
+- O vencedor da vaza é quem inicia jogando a próxima vaza.
+- O jogo segue até que todo o monte se esgote e todas as cartas das mãos sejam jogadas.
+
+--------------------------------------------------------------------------------
+7. REGRA ESPECIAL DO HELEY
+--------------------------------------------------------------------------------
+O Heley é um evento especial que ocorre durante a execução de uma vaza:
+- Condição obrigatória: O Ás de trunfo deve ser jogado IMEDIATAMENTE após o 7 
+  de trunfo na mesma vaza (sequência direta: carta N é o 7 de trunfo e carta N+1 
+  é o Ás de trunfo).
+
+Tipos de Heley:
+A) HELEY NORMAL:
+   - Ocorre quando o 7 de trunfo e o Ás de trunfo são jogados por jogadores de 
+     duplas adversárias (ex: adversário jogou o 7 e você ou seu parceiro jogou o Ás).
+   - Pontuação: Concede 1 ponto de partida (ou 2 pontos se Copas estiver batida) 
+     para a dupla do jogador que jogou o Ás.
+
+B) HELEY DE AMIGO:
+   - Ocorre quando o 7 de trunfo e o Ás de trunfo são jogados por jogadores da 
+     MESMA dupla (ex: seu parceiro jogou o 7 e você jogou o Ás em cima).
+   - Pontuação: O ponto do Heley é concedido para a DUPLA ADVERSÁRIA!
+     - 1 ponto para a dupla adversária (ou 2 pontos se Copas estiver batida).
+
+C) HELEY DE MESA (NÃO PONTUA / INVÁLIDO):
+   - Se o 7 de trunfo for jogado no início da rodada e o Ás de trunfo aparecer 
+     apenas no final após outras cartas terem sido jogadas no meio, NÃO É HELEY.
+   - O Ás precisa obrigatoriamente cair de forma imediatamente consecutiva ao 7.
+
+--------------------------------------------------------------------------------
+8. PONTUAÇÃO DA MÃO E CONDIÇÕES DE VITÓRIA
+--------------------------------------------------------------------------------
+Ao final de todas as cartas jogadas, somam-se os pontos das cartas recolhidas 
+por cada dupla (total de 120 pontos na mesa):
+
+Tabela de Pontuação da Partida:
++-------------------+-----------------+-----------------------+
+| Situação          | Pontos Normais  | Copas Batida (BATER)  |
++-------------------+-----------------+-----------------------+
+| Vitória Simples   | 1 ponto         | 2 pontos              |
+| Capote            | 1 ponto extra   | 2 pontos extras       |
+| Heley Normal      | 1 ponto         | 2 pontos              |
+| Heley de Amigo    | 1 pt p/ advers. | 2 pts p/ adversário   |
++-------------------+-----------------+-----------------------+
+
+Definições:
+- Vitória Simples: Conquistada pela dupla que obtiver mais de 60 pontos em cartas 
+  (ex: 61 ou mais).
+- Regra do Capote:
+  - Ocorre quando a dupla perdedora termina a mão com MENOS DE 31 PONTOS de cartas 
+    (ou seja, entre 0 e 30 pontos acumulados).
+  - A dupla vencedora recebe 1 ponto extra de Capote (ou 2 pontos extras se Copas 
+    estiver batida), totalizando 2 pontos normais (ou 4 pontos em Copas batida).
+
+REGRA ESPECIAL DOS 120 PONTOS (VITÓRIA DIRETA):
+- Se uma dupla conseguir capturar TODOS OS 120 PONTOS de cartas disponíveis na mão, 
+  ela VENCE A PARTIDA IMEDIATAMENTE!
+- AVISO DE DESENVOLVIMENTO:
+  * O número 120 NÃO é uma categoria de pontuação acumulativa.
+  * NÃO criar variável ou somar pontos adicionais por atingir 120.
+  * O 120 é uma condição de término e vitória imediata e definitiva da partida.
+  * Não computar simultaneamente vitória simples e capote quando os 120 forem atingidos.
+
+--------------------------------------------------------------------------------
+9. DIRETRIZES DE COMUNICAÇÃO ENTRE PARCEIROS
+--------------------------------------------------------------------------------
+- Na modalidade online, as cartas dos adversários e do parceiro permanecem ocultas 
+  durante o andamento das vazas.
+- É proibida a implementação de gestos automáticos ou visualização contínua das cartas 
+  do parceiro durante as jogadas.
+- Os parceiros só podem visualizar as mãos mútuas no início ou ao término da partida 
+  para conferência.
+
+================================================================================
+Fim do documento de regras - Bisca Capixaba.
+================================================================================
