@@ -1,0 +1,212 @@
+/* style.css – Bisca Capixaba prototype */
+
+/* Reset & basic layout */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #006400; /* dark green tabletop */
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  text-align: center;
+  padding: 1rem 0;
+  background: #004d00;
+}
+
+h1 {
+  font-size: 2rem;
+  letter-spacing: 0.1rem;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+/* Scoreboard */
+.scoreboard {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.team {
+  background: rgba(0,0,0,0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Table layout */
+.table {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  background: #0a5a0a; /* slightly lighter green for the playing surface */
+  border-radius: 12px;
+  display: grid;
+  grid-template-areas:
+    "p4   center   p2"
+    "p3   center   p1";
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+
+.player-name {
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.player-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Assign grid areas */
+#player1 { grid-area: p1; }
+#player2 { grid-area: p2; }
+#player3 { grid-area: p3; }
+#player4 { grid-area: p4; }
+
+.center-area {
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.trump-suit {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.played-cards {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Hand controls */
+.hand-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Deck pile */
+.deck-pile {
+  font-size: 2rem;
+  cursor: pointer;
+  user-select: none;
+  margin: 0.5rem 0;
+}
+
+/* Played cards stacked */
+.played-cards {
+  position: relative;
+  width: 70px; /* enough width for stacked cards */
+  height: 120px;
+}
+
+.played-cards .card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(var(--offset-x), var(--offset-y)) rotate(var(--rot));
+}
+
+.hand-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#cutButton { background: #d4a017; color: #000; }
+#baterButton { background: #c00; color: #fff; }
+#restartButton { background: #555; color: #fff; }
+
+.action-button:hover { opacity: 0.9; }
+
+/* Card representation */
+.card {
+  width: 60px;
+  height: 90px;
+  background: #fff;
+  color: #000;
+  border-radius: 6px;
+  border: 2px solid #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px;
+  font-size: 0.9rem;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card.selected {
+  outline: 3px solid #ffd700;
+}
+
+.card .rank { text-align: left; font-weight: bold; }
+.card .suit { text-align: right; font-weight: bold; }
+
+/* Suit symbols (simple letters) */
+.suit-COPAS   { color: #d00; }
+.suit-OUROS   { color: #0a0; }
+.suit-ESPADAS { color: #00a; }
+.suit-PAUS    { color: #a60; }
+
+/* Player hand */
+.player-hand {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .table { height: 300px; }
+  .card { width: 45px; height: 70px; font-size: 0.7rem; }
+}
+
